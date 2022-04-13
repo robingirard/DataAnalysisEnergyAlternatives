@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 import numpy as np
 
 
-def marimekko(df,x_var_name,y_var_name,effectif_var_name):
+def marimekko(df,x_var_name,y_var_name,effectif_var_name,color_discrete_sequence):
     labels = df[x_var_name].unique().tolist() #["apples","oranges","pears","bananas"]
     widths = np.array(df.groupby(x_var_name)[effectif_var_name].sum())/df[effectif_var_name].sum()*100
     Y_given_X = (df.groupby([x_var_name,y_var_name])[effectif_var_name].sum()/df.groupby(x_var_name)[effectif_var_name].sum()*100).reset_index()
@@ -32,10 +32,8 @@ def marimekko(df,x_var_name,y_var_name,effectif_var_name):
             textangle=0,
             textfont_color="white",
             hovertemplate="<br>".join([
-                "label: %{customdata[0]}",
-                "width: %{width}",
-                "height: %{y}",
-                "area: %{customdata[1]}",
+                "Nb : %{customdata[2]} Millions",
+                "Prop : %{customdata[1]} [%total]"
             ])
         ))
 

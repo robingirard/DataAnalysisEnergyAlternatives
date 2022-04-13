@@ -37,7 +37,8 @@ plotly.offline.plot(fig, filename='tmp.html')
 fig=marimekko(data_primary.groupby(['energy_class',"construction_year_class"], as_index=False)['IPONDL'].sum(),
                 x_var_name = "construction_year_class",
                 y_var_name= "energy_class",
-                effectif_var_name='IPONDL')
+                effectif_var_name='IPONDL',
+              color_discrete_sequence=dpe_colors)
 plotly.offline.plot(fig, filename='tmp.html')
 
 
