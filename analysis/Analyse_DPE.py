@@ -41,6 +41,7 @@ fig=marimekko(data_primary.groupby(['energy_class',"construction_year_class"], a
               color_discrete_sequence=dpe_colors)
 plotly.offline.plot(fig, filename='tmp.html')
 
+df = data_primary.groupby(['energy_class',"construction_year_class","occupancy_status"], as_index=False)['IPONDL'].sum()
 
 
 
