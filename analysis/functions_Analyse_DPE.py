@@ -27,7 +27,7 @@ def marimekko(df,x_var_name,y_var_name,effectif_var_name):
             offset=0,
             customdata=np.transpose([labels, np.around(widths*heights[key]/100,1),
                                      np.around(widths*heights[key]*Total/(100*100),1)]),
-            texttemplate="Nb : <br>%{customdata[2]} Mi, <br>%{customdata[1]}%",
+            texttemplate="Nb : %{customdata[2]} Millions, <br>%{customdata[1]} [%total]",
             textposition="inside",
             textangle=0,
             textfont_color="white",
@@ -41,7 +41,7 @@ def marimekko(df,x_var_name,y_var_name,effectif_var_name):
 
     fig.update_xaxes(
         tickvals=np.cumsum(widths)-widths/2,
-        ticktext= ["%s<br>%d" % (l, w) for l, w in zip(labels, widths)]
+        ticktext= ["%s" % l for l in labels]
     )
 
     fig.update_xaxes(range=[0,100])
