@@ -1,0 +1,17 @@
+name : DataAnalysis_energy-alternatives
+channels:
+  - conda-forge
+  - defaults
+  - conda-forge/label/broken
+dependencies :
+    - python>=3.10
+    - pandas
+    - geopandas
+    - jupyter
+    - numpy
+    - pip
+    - pip :
+      - xarray
+      - plotly
+      - matplotlib
+      - sklearn
