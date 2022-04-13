@@ -18,8 +18,9 @@ def marimekko(df,x_var_name,y_var_name,effectif_var_name,color_discrete_sequence
     Total = df[effectif_var_name].sum()/10**6
 
     fig = go.Figure()
-    for key in heights:
+    for i,key in enumerate(heights):
         fig.add_trace(go.Bar(
+            marker_color=color_discrete_sequence[i],
             name=key,
             y=heights[key],
             x=np.cumsum(widths)-widths,
