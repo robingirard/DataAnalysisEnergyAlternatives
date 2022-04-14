@@ -138,18 +138,19 @@ def marimekko_3(df,ColorY_var_name,horizontalX_var_name,TextureX_var_name,effect
     ColorY_given_horizontalX["Dheight0"] = ColorY_given_horizontalX["Dheight"].groupby([horizontalX_var_name]).shift().fillna(0)
     ColorY_given_horizontalX["y0"] = ColorY_given_horizontalX["Dheight0"].groupby([horizontalX_var_name]).cumsum()
     # test : ColorY_given_horizontalX.groupby(horizontalX_var_name)["Dheight"].sum() == 100
-    AllX_given_ColorY= (df.groupby([ColorY_var_name,horizontalX_var_name,TextureX_var_name])[effectif_var_name].sum()/df.groupby([ColorY_var_name])[effectif_var_name].sum()*100).reset_index()
+    AllX_given_ColorY= (df.groupby([ColorY_var_name,horizontalX_var_name,TextureX_var_name])[effectif_var_name].sum()/df[effectif_var_name].sum()*100).reset_index()
     AllX_given_ColorY=AllX_given_ColorY.set_index([ColorY_var_name,horizontalX_var_name,TextureX_var_name]).\
         rename(columns={"IPONDL": "Proportion"})
-    # test : AllX_given_ColorY.groupby(ColorY_var_name)["Dwidth"].sum() == 100
+    # test : AllX_given_ColorY["Proportion"].sum() == 100
     AllDistrib = AllX_given_ColorY.join(ColorY_given_horizontalX, how="inner")
-    AllDistrib["Dwidth"]=AllDistrib["Proportion"]/AllDistrib["Dheight"]*100
+    AllDistrib["Dwidth"]=AllDistrib["Proportion"]/(AllDistrib["Dheight"]/100)
     AllDistrib["x1"] = AllDistrib["Dwidth"].groupby(ColorY_var_name).cumsum()
     AllDistrib["Dwidth0"] = AllDistrib["Dwidth"].groupby(ColorY_var_name).shift().fillna(0)
     AllDistrib["x0"] = AllDistrib["Dwidth0"].groupby(ColorY_var_name).cumsum()
 
-
-
+    #to put labels on X axis
+    widths = np.array(df.groupby([horizontalX_var_name])[effectif_var_name].sum()) / df[effectif_var_name].sum() * 100
+    labels_X_axis  = df[horizontalX_var_name].unique().tolist()
     LegendList=[]
 
 
@@ -183,10 +184,10 @@ def marimekko_3(df,ColorY_var_name,horizontalX_var_name,TextureX_var_name,effect
                 "Prop : "+str(np.around(Proportion, 1))+" [%total]"
             ])
         ))
-  #  fig.update_xaxes(
-  #      tickvals=np.cumsum(widths)-widths/2,
-  #      ticktext= ["%s" % l for l in labels]
-  #  )
+    fig.update_xaxes(
+        tickvals=np.cumsum(widths)-widths/2,
+        ticktext= ["%s" % l for l in labels_X_axis]
+    )
     fig.update_xaxes(range=[0, 100])
     fig.update_yaxes(range=[0, 100])
 
