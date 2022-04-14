@@ -41,9 +41,28 @@ fig=marimekko(data_primary.groupby(['energy_class',"construction_year_class"], a
               color_discrete_sequence=dpe_colors)
 plotly.offline.plot(fig, filename='tmp.html')
 
-df = data_primary.groupby(['energy_class',"construction_year_class","residential_type"], as_index=False)['IPONDL'].sum()
+ColorY_var_name = "energy_class"
+horizontalX_var_name = "construction_year_class"
+TextureX_var_name = "residential_type"
 
+df = data_primary.groupby([ColorY_var_name,horizontalX_var_name,TextureX_var_name], as_index=False)['IPONDL'].sum()
+fig = marimekko_3(df =df ,ColorY_var_name=ColorY_var_name,horizontalX_var_name=horizontalX_var_name,
+            TextureX_var_name=TextureX_var_name,color_discrete_sequence=dpe_colors)
+plotly.offline.plot(fig, filename='Etiquette_age_residential_type.html')
 
+data_primary["living_area_class_simple"] = data_primary["living_area_class"]
+data_primary.loc[data_primary["living_area_class_simple"].isin(['De 40 à 60 m²', 'De 30 à 40 m²', 'Moins de 30 m²']),"living_area_class_simple"]='moins de 60m2'
+data_primary.loc[data_primary["living_area_class_simple"].isin(['De 60 à 80 m²','De 80 à 100 m²']),"living_area_class_simple"]='De 60 à 100 m²'
+data_primary.loc[data_primary["living_area_class_simple"].isin(['De 100 à 120 m²', '120 m² ou plus']),"living_area_class_simple"]='100 m² ou plus'
+
+data_primary["heating_system_simple"] = data_primary["heating_system"]
+data_primary.loc[data_primary["heating_system_simple"].isin(['Autres','Chauffage urbain']),"heating_system_simple"]='Autres et Chauffage urbain'
+data_primary.loc[data_primary["heating_system_simple"].isin(['Chaudière fioul','Chaudière - autres']),"heating_system_simple"]='Chaudière fioul-autre'
+for TextureX_var_name in  ["heating_system_simple","living_area_class_simple","occupancy_status","residential_type"]:
+    df = data_primary.groupby([ColorY_var_name,horizontalX_var_name,TextureX_var_name], as_index=False)['IPONDL'].sum()
+    fig = marimekko_3(df =df ,ColorY_var_name=ColorY_var_name,horizontalX_var_name=horizontalX_var_name,
+                TextureX_var_name=TextureX_var_name,color_discrete_sequence=dpe_colors)
+    plotly.offline.plot(fig, filename='Etiquette_age_'+TextureX_var_name+'.html')
 
 #region bazar
 fig = px.bar(data_primary.groupby(['energy_class',"construction_year_class"], as_index=False)['IPONDL'].sum(),

@@ -118,14 +118,12 @@ def marimekko_2(df,x_var_name,y_var_name,cond_var_name,effectif_var_name,color_d
 
     return fig
 
-ColorY_var_name="energy_class"
-horizontalX_var_name="construction_year_class"
-TextureX_var_name="residential_type"
-def marimekko_3(df,ColorY_var_name,horizontalX_var_name,TextureX_var_name,effectif_var_name,color_discrete_sequence):
+
+def marimekko_3(df,ColorY_var_name,horizontalX_var_name,TextureX_var_name,color_discrete_sequence,effectif_var_name='IPONDL'):
     ## ColorY_var_name : variable codée par couleur répartie sur la hauteur  --  e.g. classe énergétique
     ## horizontalX_var_name : variable codée par X -- e.g. age du bâtiment
     ## TextureX_var_name : variable codée par la texture sur la largeur -- e.g. type de logement
-    pattern_sequence = ["/", ".", "x", "+"]
+    pattern_sequence = [ '/', 'x', '-', '|', '+', '.',"\\",'']
     pattern_dic = dict(zip(df[TextureX_var_name].unique(),pattern_sequence))
     color_dic = dict(zip(df[ColorY_var_name].unique(), color_discrete_sequence))
 
@@ -170,10 +168,12 @@ def marimekko_3(df,ColorY_var_name,horizontalX_var_name,TextureX_var_name,effect
             showlegend=showlegend,
             fillpattern={
                 "bgcolor": color_dic[ColorY_val],
+                "fgcolor": "grey",
                 "shape": pattern_dic[TextureX_val]
             },
             fill='tonexty',
             mode='none',
+            marker={"colorbar" : {"bordercolor": "white"}},
             name="Class " + ColorY_val + ", "+TextureX_val,
             y=[y0, y0, y1, y1, y0],
             x=[x0, x1, x1, x0, x0],
@@ -195,6 +195,6 @@ def marimekko_3(df,ColorY_var_name,horizontalX_var_name,TextureX_var_name,effect
         title_text="Marimekko Chart",
         uniformtext=dict(mode="hide", minsize=10),
     )
-    plotly.offline.plot(fig, filename='tmp.html')
+    #plotly.offline.plot(fig, filename='tmp.html')
 
     return fig
