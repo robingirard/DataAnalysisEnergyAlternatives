@@ -1,4 +1,5 @@
 #region import et initialisation
+import numpy as np
 import pandas as pd
 import string
 from analysis.functions_Analyse_DPE import *
@@ -34,6 +35,7 @@ fig = px.bar(data_primary.groupby('energy_class', as_index=False)['IPONDL'].sum(
 plotly.offline.plot(fig, filename='tmp.html')
 #endregion
 
+#region Marimekko
 fig=marimekko(data_primary.groupby(['energy_class',"construction_year_class"], as_index=False)['IPONDL'].sum(),
                 x_var_name = "construction_year_class",
                 y_var_name= "energy_class",
@@ -50,19 +52,87 @@ fig = marimekko_2(df =df ,ColorY_var_name=ColorY_var_name,horizontalX_var_name=h
             TextureX_var_name=TextureX_var_name,color_discrete_sequence=dpe_colors)
 plotly.offline.plot(fig, filename='Etiquette_age_residential_type.html')
 
-data_primary["living_area_class_simple"] = data_primary["living_area_class"]
-data_primary.loc[data_primary["living_area_class_simple"].isin(['De 40 à 60 m²', 'De 30 à 40 m²', 'Moins de 30 m²']),"living_area_class_simple"]='moins de 60m2'
-data_primary.loc[data_primary["living_area_class_simple"].isin(['De 60 à 80 m²','De 80 à 100 m²']),"living_area_class_simple"]='De 60 à 100 m²'
-data_primary.loc[data_primary["living_area_class_simple"].isin(['De 100 à 120 m²', '120 m² ou plus']),"living_area_class_simple"]='100 m² ou plus'
+data_primary=Create_simplified_variables(data_primary)
 
-data_primary["heating_system_simple"] = data_primary["heating_system"]
-data_primary.loc[data_primary["heating_system_simple"].isin(['Autres','Chauffage urbain']),"heating_system_simple"]='Autres et Chauffage urbain'
-data_primary.loc[data_primary["heating_system_simple"].isin(['Chaudière fioul','Chaudière - autres']),"heating_system_simple"]='Chaudière fioul-autre'
-for TextureX_var_name in  ["heating_system_simple","living_area_class_simple","occupancy_status","residential_type"]:
+ColorY_var_name = "energy_class"
+horizontalX_var_name = "construction_year_class"
+TextureX_var_name = "residential_type"
+for TextureX_var_name in  ["heating_system_simple","living_area_class_simple","occupancy_status_simple","residential_type"]:
     df = data_primary.groupby([ColorY_var_name,horizontalX_var_name,TextureX_var_name], as_index=False)['IPONDL'].sum()
     fig = marimekko_2(df =df ,ColorY_var_name=ColorY_var_name,horizontalX_var_name=horizontalX_var_name,
                 TextureX_var_name=TextureX_var_name,color_discrete_sequence=dpe_colors)
     plotly.offline.plot(fig, filename='Etiquette_age_'+TextureX_var_name+'.html')
+
+ColorY_var_name = "energy_class"
+horizontalX_var_name = "occupancy_status_simple"
+TextureX_var_name = "heating_system_simple"
+df = data_primary.groupby([ColorY_var_name,horizontalX_var_name,TextureX_var_name], as_index=False)['IPONDL'].sum()
+fig = marimekko_2(df =df ,ColorY_var_name=ColorY_var_name,horizontalX_var_name=horizontalX_var_name,
+            TextureX_var_name=TextureX_var_name,color_discrete_sequence=dpe_colors)
+plotly.offline.plot(fig, filename='Etiquette_heating_system_'+TextureX_var_name+'.html')
+
+ColorY_var_name = "energy_class"
+horizontalX_var_name = "occupancy_status_simple"
+TextureX_var_name = "living_area_class_simple"
+df = data_primary.groupby([ColorY_var_name,horizontalX_var_name,TextureX_var_name], as_index=False)['IPONDL'].sum()
+fig = marimekko_2(df =df ,ColorY_var_name=ColorY_var_name,horizontalX_var_name=horizontalX_var_name,
+            TextureX_var_name=TextureX_var_name,color_discrete_sequence=dpe_colors)
+plotly.offline.plot(fig, filename='Etiquette_heating_system_'+TextureX_var_name+'.html')
+
+fig=marimekko(data_primary.groupby(['energy_class',"heating_system_simple"], as_index=False)['IPONDL'].sum(),
+                x_var_name = "heating_system_simple",
+                y_var_name= "energy_class",
+                effectif_var_name='IPONDL',
+              color_discrete_sequence=dpe_colors)
+plotly.offline.plot(fig, filename='tmp.html')
+
+
+ColorY_var_name = "heating_system_simple"
+horizontalX_var_name = "energy_class"
+TextureX_var_name="construction_year_class_simple";
+df = data_primary.groupby([ColorY_var_name, horizontalX_var_name, TextureX_var_name], as_index=False)['IPONDL'].sum()
+fig = marimekko_2(df=df, ColorY_var_name=ColorY_var_name, horizontalX_var_name=horizontalX_var_name,
+                  TextureX_var_name=TextureX_var_name, color_discrete_sequence=dpe_colors)
+plotly.offline.plot(fig, filename='Etiquette_age_' + TextureX_var_name + '.html')
+#endregion
+
+#region distribution conso et etiquette en énergie finale
+energy_plot_max = 800
+data_primary["energy_cuts"]=pd.cut(data_primary.energy_consumption,
+                                   bins = np.arange(0,energy_plot_max,step=2.)).\
+    map(lambda x:x.mid).astype("float")
+indexes = data_primary.energy_consumption <= energy_plot_max
+fig = px.bar(data_primary.loc[indexes,:].groupby(["energy_cuts","energy_class"], as_index=False)['IPONDL'].sum(),
+                     x="energy_cuts", y='IPONDL',color="energy_class",
+                color_discrete_sequence=dpe_colors,
+             labels={
+                 "energy_cuts": "Conso energetique",
+                 "IPONDL": "Nombre de logements"}
+             )
+plotly.offline.plot(fig, filename='tmp.html')
+
+data_primary.loc[:,"energy_consumption_final"]=data_primary.energy_consumption
+data_primary.loc[data_primary["heating_system"].isin(['Chauffage électrique','Pompes à chaleur électricité']),"energy_consumption_final"]=data_primary.loc[data_primary["heating_system"].isin(['Chauffage électrique','Pompes à chaleur électricité']),"energy_consumption_final"]/2.55
+
+data_primary.loc[:,"energy_class2"]=pd.cut(data_primary.energy_consumption_final,
+                                   bins = [0,50,90,150,230,330,450,100000],labels=
+                                   ["A","B","C","D","E","F","G"]).astype("str")
+
+fig=marimekko(data_primary.groupby(['energy_class2',"heating_system_simple"], as_index=False)['IPONDL'].sum().dropna(),
+                x_var_name = "heating_system_simple",
+                y_var_name= "energy_class2",
+                effectif_var_name='IPONDL',
+              color_discrete_sequence=dpe_colors)
+plotly.offline.plot(fig, filename='tmp.html')
+
+ColorY_var_name = "energy_class2"
+horizontalX_var_name = "construction_year_class"
+TextureX_var_name="heating_system_simple";
+df = data_primary.groupby([ColorY_var_name, horizontalX_var_name, TextureX_var_name], as_index=False)['IPONDL'].sum()
+fig = marimekko_2(df=df, ColorY_var_name=ColorY_var_name, horizontalX_var_name=horizontalX_var_name,
+                  TextureX_var_name=TextureX_var_name, color_discrete_sequence=dpe_colors)
+plotly.offline.plot(fig, filename='Etiquette_finale_age_' + TextureX_var_name + '.html')
+#endregion
 
 #region bazar
 fig = px.bar(data_primary.groupby(['energy_class',"construction_year_class"], as_index=False)['IPONDL'].sum(),
